@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class FrameManager(models.Manager):
 
-    def copy_map_story_frames(self, source_id, target):
+    def copy_frames(self, source_id, target):
         source = Map.objects.get(id=source_id)
         copies = []
 

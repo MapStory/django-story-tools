@@ -1,0 +1,8 @@
+{
+  "name": "django-story-tools",
+  "version": "0.0.1",
+  "devDependencies": {},
+  "dependencies": {
+    "story-tools": "https://github.com/MapStory/story-tools.git#master"
+  }
+}
