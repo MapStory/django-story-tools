@@ -1,4 +1,4 @@
-[![Travis CI Status](https://travis-ci.org/MapStory/django-story-tools.svg)](https://travis-ci.org/MapStory/django-story-tools)
+[![Travis CI Status](https://travis-ci.org/MapStory/django-story-tools.svg?branch=chore%2Fbootstrap)](https://travis-ci.org/MapStory/django-story-tools)
 # django-story-tools
 A Django wrapper for Story-Tools that enables functionality for styling, annotations, timeline configuration and editing of a web mapping client based on OpenLayers 3.
 
