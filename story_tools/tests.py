@@ -11,10 +11,12 @@ import csv
 import json
 
 
-def _frames_get(req, mapid):
-    mapobj = resolve_object(req, Map, {'id': mapid}, permission='base.view_resourcebase')
-    cols = ['title', 'description', 'start_time', 'end_time', 'center', 'speed',
-            'interval', 'playback', 'playbackRate', 'intervalRate', 'zoom']
+def _frames_get(req, mapid): # NOQA
+    mapobj = resolve_object(req, Map, {'id': mapid},
+                            permission='base.view_resourcebase')
+    cols = ['title', 'description', 'start_time', 'end_time',
+            'center', 'speed', 'interval', 'playback', 'playbackRate',
+            'intervalRate', 'zoom']
     box = Frame.objects.filter(map=mapid)
     box = box.order_by('start_time', 'end_time', 'title')
     if bool(req.GET.get('in_map', False)):
@@ -30,15 +32,19 @@ def _frames_get(req, mapid):
 
     if 'csv' in req.GET:
         response = HttpResponse(mimetype='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=map-%s-frames.csv' % mapobj.id
+        response['Content-Disposition'] = \
+            'attachment; filename=map-%s-frames.csv' % mapobj.id
         response['Content-Encoding'] = 'utf-8'
         writer = csv.writer(response)
         writer.writerow(cols)
         sidx = cols.index('start_time')
         eidx = cols.index('end_time')
+
         # default csv writer chokes on unicode
-        encode = lambda v: v.encode('utf-8') if isinstance(v, basestring) else str(v)
-        get_value = lambda a, c: getattr(a, c) if c not in ('start_time', 'end_time') else ''
+        def encode(v): lambda v: v.encode('utf-8') if isinstance(v, basestring) else str(v) # NOQA
+
+        def get_value(a, c): lambda a, c: getattr(a, c) if c not in ('start_time', 'end_time') else '' # NOQA
+
         for a in box:
             vals = [encode(get_value(a, c)) for c in cols]
             vals[sidx] = a.start_time_str
@@ -52,7 +58,7 @@ def _frames_get(req, mapid):
     def encode(query_set):
         results = []
         for res in query_set:
-            feature = { 'id' : res.id}
+            feature = {'id': res.id}
             if res.the_geom:
                 feature['geometry'] = res.the_geom
 
@@ -72,18 +78,24 @@ def _frames_get(req, mapid):
             results.append(feature)
         return results
 
-    return json_response({'type':'FeatureCollection','features':encode(box)})
+    return json_response({'type': 'FeatureCollection',
+                          'features': encode(box)})
 
 
-def _frames_post(req, mapid):
-    mapobj = resolve_object(req, Map, {'id':mapid}, permission='base.change_resourcebase')
+def _frames_post(req, mapid): # NOQA
+    mapobj = resolve_object(req, Map, {'id': mapid},
+                            permission='base.change_resourcebase')
 
     # default action
     action = 'upsert'
+
     # default for json to unpack properties for each 'row'
-    get_props = lambda r: r['properties']
+    def get_props(r):
+        lambda r: r['properties']
+
     # operation to run on completion
-    finish = lambda: None
+    def finish():
+        lambda: None
     # track created frames
     created = []
     # csv or client to account for differences
@@ -106,13 +118,20 @@ def _frames_post(req, mapid):
         fp = iter(req.FILES.values()).next()
         # ugh, builtin csv reader chokes on unicode
         data = unicode_csv_dict_reader(fp)
-        id_collector = lambda f: None
+
+        def id_collector(): lambda f: None # NOQA
+
         form_mode = 'csv'
         content_type = 'text/html'
-        get_props = lambda r: r
-        ids = list(Frame.objects.filter(map=mapobj).values_list('id', flat=True))
+
+        def get_props(): lambda r: r # NOQA
+
+        ids = list(Frame.objects.filter(map=mapobj).values_list('id',
+                                                                flat=True))
+
         # delete existing, we overwrite
-        finish = lambda: Frame.objects.filter(id__in=ids).delete()
+        def finish(): lambda: Frame.objects.filter(id__in=ids).delete() # NOQA
+
         overwrite = True
 
         def error_format(row_errors):
@@ -121,7 +140,8 @@ def _frames_post(req, mapid):
                 row = re[0] + 1
                 for e in re[1]:
                     response.append('[%s] %s : %s' % (row, e, re[1][e]))
-            return 'The following rows had problems:<ul><li>' + '</li><li>'.join(response) + "</li></ul>"
+            return 'The following rows had problems:<ul><li>' + \
+                   '</li><li>'.join(response) + "</li></ul>"
 
     if action == 'delete':
         Frame.objects.filter(pk__in=data['ids'], map=mapobj).delete()
@@ -130,7 +150,8 @@ def _frames_post(req, mapid):
     if action != 'upsert':
         return HttpResponse('%s not supported' % action, status=400)
 
-    errors = _write_frames(data, get_props, id_collector, mapobj, overwrite, form_mode)
+    errors = _write_frames(data, get_props, id_collector,
+                           mapobj, overwrite, form_mode)
 
     if errors:
         transaction.rollback()
@@ -180,5 +201,5 @@ def frames(req, mapid):
         return _frames_get(req, mapid)
     if req.method == 'POST':
         return _frames_post(req, mapid)
-    
+
     return HttpResponse(status=400)

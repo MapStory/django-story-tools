@@ -4,8 +4,6 @@ from story_tools.utils import parse_date_time
 
 from datetime import datetime
 
-from django.contrib.gis.db import models as gis
-
 
 class SpatioTemporalMixin(models.Model):
 

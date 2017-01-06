@@ -64,9 +64,11 @@ def unicode_csv_dict_reader(fp):
         raise UnicodeError('unable to decode CSV, invalid characters present')
 
     fp.seek(0)
-    lines = (line.encode('utf-8') for line in codecs.getreader(enc)(fp, errors='ignore'))
+    lines = (line.encode('utf-8')
+             for line in codecs.getreader(enc)(fp, errors='ignore'))
     reader = csv.DictReader(lines)
-    return (dict([(k, unicode(v, 'utf-8')) for k, v in row.items() if v]) for row in reader)
+    return (dict([(k, unicode(v, 'utf-8'))
+                  for k, v in row.items() if v]) for row in reader)
 
 
 def make_point(x, y):

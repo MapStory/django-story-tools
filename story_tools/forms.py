@@ -34,7 +34,8 @@ class FrameForm(forms.ModelForm):
             elif isinstance(geom, dict):
                 geom = json.dumps(geom)
             else:
-                self._my_errors['geometry'] = 'geometry should be string or dict'
+                self._my_errors['geometry'] = \
+                    'geometry should be string or dict'
             self.data['the_geom'] = geom
         lat, lon = self.parse_float('lat'), self.parse_float('lon')
         if all([lat, lon]):
@@ -44,7 +45,7 @@ class FrameForm(forms.ModelForm):
         super(FrameForm, self).full_clean()
         self._errors.update(self._my_errors)
 
-    def _convert_time(self, key):
+    def _convert_time(self, key): # NOQA
         val = self.data.get(key, None)
         if not val:
             return
@@ -64,7 +65,8 @@ class FrameForm(forms.ModelForm):
             except ValueError, e:
                 err = str(e)
             if val is not None and parsed is None:
-                err = 'Unable to read as date : %s, please format as yyyy-mm-dd' % val
+                err = 'Unable to read as date : %s, ' \
+                      'please format as yyyy-mm-dd' % val
             if err:
                 self._my_errors[key] = err
             if parsed:

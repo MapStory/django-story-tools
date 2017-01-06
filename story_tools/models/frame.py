@@ -3,10 +3,6 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import fields
 
-from story_tools.utils import parse_date_time
-
-from datetime import datetime
-
 from story_tools.models.mixins import SpatioTemporalMixin
 
 import logging
@@ -17,7 +13,7 @@ logger = logging.getLogger(__name__)
 class FrameManager(models.Manager):
 
     def copy_frames(self, source_id, target):
-        source = Map.objects.get(id=source_id)
+        source = self.objects.get(id=source_id)
         copies = []
 
         logger.debug('copy from', source_id, source.Frame_set.all())
@@ -35,15 +31,19 @@ class FrameManager(models.Manager):
 
 class Frame(SpatioTemporalMixin):
 
-    # The Frame or frame of interest (FOI) represents the geographic extent of an event. It can be used to provide a
-    # spatial context for the narrative or to restrict the aspect ratio to a specific geographic area or point for a
-    # determined time range. You can also configure a playback rate and interval rate for the frame runtime playback.
+    # The Frame or frame of interest (FOI) represents the
+    # geographic extent of an event. It can be used to provide
+    # a spatial context for the narrative or to restrict the
+    # aspect ratio to a specific geographic area or point for
+    # a determined time range. You can also configure a playback
+    # rate and interval rate for the frame runtime playback.
 
     objects = FrameManager()
 
     PLAYBACK_RATE = (('seconds', 'Seconds'), ('minutes', 'Minutes'),)
     INTERVAL_RATE = (('minutes', 'Minutes'), ('hours', 'Hours'),
-                     ('weeks', 'Weeks'), ('months', 'Months'), ('years', 'Years'),)
+                     ('weeks', 'Weeks'), ('months', 'Months'),
+                     ('years', 'Years'),)
 
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
@@ -56,10 +56,12 @@ class Frame(SpatioTemporalMixin):
     center = models.TextField(blank=True, null=True)
 
     interval = models.IntegerField(blank=True, null=True)
-    intervalRate = models.CharField(max_length=10, choices=INTERVAL_RATE, blank=True, null=True)
+    intervalRate = models.CharField(max_length=10, choices=INTERVAL_RATE,
+                                    blank=True, null=True)
 
     playback = models.IntegerField(blank=True, null=True)
-    playbackRate = models.CharField(max_length=10, choices=PLAYBACK_RATE, blank=True, null=True)
+    playbackRate = models.CharField(max_length=10, choices=PLAYBACK_RATE,
+                                    blank=True, null=True)
 
     speed = models.TextField(blank=True, null=True)
     zoom = models.IntegerField(blank=True, null=True)
@@ -71,4 +73,3 @@ class Frame(SpatioTemporalMixin):
 
     class Meta:
         verbose_name_plural = "Frame"
-
